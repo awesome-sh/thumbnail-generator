@@ -1,16 +1,73 @@
-html,
-body {
-  padding: 0;
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
-    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+@font-face {
+  font-family: 'Pretendard-ExtraLight';
+  src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-ExtraLight.woff') format('woff');
+  font-weight: 200;
+  font-style: normal;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+:root {
+  --primary: #38404e;
+  --backgroundColor: #f5f6fa;
+  --backgroundHoverColor: #f5f8ff;
+  --borderColor: #d7d9e2;
+  --borderSubColor: #f1f2f7;
+  --boxShadow: 0px 3px 8px rgba(215, 217, 226, 0.719);
+  --borderRadius: 8px;
+  --fontColor: #6d707a;
+  --fontSubColor: #8f929b;
+  --engFont: 'Raleway', sans-serif;
+  --transition: all 0.23s ease-out;
+  --buttonColor: #38404e;
+}
+
+html, body {
+  padding: 0;
+  margin: 0;
+  font-family: 'Pretendard-ExtraLight', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 * {
+  font-family: 'Pretendard-ExtraLight', sans-serif;
+  color: var(--fontColor);
+  margin: 0;
+  padding: 0;
+  outline: none;
   box-sizing: border-box;
+}
+
+input, button, select {
+  height: 38px;
+  font-size: 13px;
+}
+
+input {
+  padding-left: 15px;
+  border: 1px solid var(--borderColor);
+  transition: var(--transition);
+  -webkit-transition: var(--transition);
+  -moz-transition: var(--transition);
+  -ms-transition: var(--transition);
+  -o-transition: var(--transition);
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--buttonColor);
+}
+
+input:focus {
+  border: 1px solid var(--primary);
+}
+
+button.cancleBtn {
+  color: var(--primary);
+  background: var(--borderSubColor);
 }
