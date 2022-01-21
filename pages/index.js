@@ -7,8 +7,17 @@ import { useSelector } from 'react-redux'
 import { AppContext } from '../contexts/context'
 import Layer from '../components/Layer'
 
+import RotationIcon from '../public/assets/icons/rotation.png'
+
 export default function Home() {
   const {data, setData} = useContext(AppContext)
+
+  const [resource, setResource] = useState(data)
+
+  useEffect(() => {
+    console.log(data)
+    setResource(data)
+  }, [data])
 
   const [clientSize, setClientSize] = useState({
     width: 0,
@@ -31,32 +40,77 @@ export default function Home() {
 
   console.log('>> Index Data :: ', data)
 
-  {/*}
-  useEffect(() => {
-    const getWheelPosition = (e) => {
-      const { deltaY } = e
-      let tempScale = data.scale
+  const handleDrag = (e) => {
+    
+    console.log('>> 드래그 끝')
 
-      if(deltaY > 0) {
-        // Down
-        setData({
-          ...data,
-          scale: tempScale - 0.05
-        })
-      } else {
-        // Up
-        setData({
-          ...data,
-          scale: tempScale + 0.05
-        })
-      }
+    const offsetX = e.target.offsetWidth
+    const offsetY = e.target.offsetHeight
+
+    console.group('>> Element Offset Check')
+    console.log('- Offset X :: ', offsetX)
+    console.log('- Offset Y :: ', offsetY)
+    console.groupEnd()
+
+    console.group('>> Client X, Y')
+    console.log('- Client X :: ', e.clientX)
+    console.log('- Client Y :: ', e.clientY)
+    console.groupEnd()
+
+    const x = ((e.clientX - offsetX) / window?.innerWidth) * 100
+    const y = ((e.clientY - offsetY) / window?.innerHeight) * 100
+
+    console.group('>> Top, Left Percentage X, Y')
+    console.log('- X :: ', x)
+    console.log('- Y :: ', y)
+    console.groupEnd()
+
+    e.target.style.left = `${x}%`
+    e.target.style.top = `${y}%`
+    e.preventDefault()
+  }
+
+  const handleDragOver = (e) => {
+    console.log('>> 드래그 중')
+    e.preventDefault()
+    return false;
+  }
+
+  let onMouseMove;
+
+  const handleMouseDown = (e) => {
+    const { target } = e
+
+    let shiftX = e.clientX - target.getBoundingClientRect().left;
+    let shiftY = e.clientY - target.getBoundingClientRect().top;
+
+    // 공을 pageX, pageY 좌표 중앙에 위치하게 합니다.
+    function moveAt(pageX, pageY) {
+      target.style.left = pageX - shiftX + 'px'
+      target.style.top = pageY - shiftY + 'px'
     }
 
-    window.addEventListener('wheel', getWheelPosition)
+    // 포인터 아래로 공을 이동시킵니다.
+    moveAt(e.pageX, e.pageY);
 
-    return () => window.removeEventListener('wheel', getWheelPosition)
-  }, [])
-  */}
+    onMouseMove = (event) => {
+      moveAt(event.pageX, event.pageY);
+    }
+
+    document.addEventListener('mousemove', onMouseMove);
+
+    target.onmouseup = function() {
+      document.removeEventListener('mousemove', onMouseMove);
+      target.onmouseup = null;
+    };
+  }
+
+
+  const handleClick = (e) => {
+    const { target } = e
+    console.log( target.offsetWidth )
+    console.log( target.offsetHeight)
+  }
 
   return (
     <Wrap 
@@ -71,7 +125,38 @@ export default function Home() {
       <Nav />
 
       <Main>
-        <Canvas data={data} />
+        <Canvas 
+          resource={resource}
+        ></Canvas>
+          { resource.texts.length > 0 && resource.texts.map((v, i) => 
+              <div 
+                key={i}
+                /*
+                draggable="true"
+                onDragStart={() => console.log('>> 드래그 시작')}
+                onDragOver={handleDragOver}
+                onDragEnd={handleDrag}
+                */
+                onDragStart={(e) => e.preventDefault()}
+                onMouseDown={handleMouseDown}
+                className={`element text-${v}`}
+                style={{
+                  position: 'absolute',
+                  cursor: 'default',
+                  fontSize: `${v.size}px`,
+                  fontWeight: `${v.weight}`,
+                  color: v.color,
+                  zIndex: v.zIndex,
+                  left: v.posX === 0 ? '' : `50%`,
+                }}
+                onClick={handleClick}
+              >
+                {v.text}
+              </div>
+
+            )
+          }
+        
       </Main>
 
       <Layer />
@@ -116,17 +201,60 @@ const Main = styled.main`
   width: 100%;
   height: 100%;
   overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .element {
+    position: absolute;
+    width: fit-content;
+    height: fit-content;
+    padding: 10px;
+    border: 2px dotted transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+    .rotate-icon {
+      display: none;
+      position: absolute;
+      z-index:9999;
+      top: -15px;
+      right: -15px;
+      width: 20px;
+      height: 20px;
+      border-radius: 20px;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 10px;
+      font-weight: bold;
+      background: #202020;
+    }
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.384);
+      border: 2px dotted #202020;
+    }
+
+    &:hover .rotate-icon {
+      display: flex;
+    }
+
+
+  }
 `
 
 const Canvas = styled.div`
-  position: absolute;
+  position: relative;
   z-index: 0;
-  top: 50%;
-  left: 50%;
-  transform: ${({ data }) => `scale(${data.scale}) translate(-50%, -50%)`};
-  background: ${({ data }) => data.backgroundType === 'color' ? `${data.background}` : `linear-gradient(${data.gradient.start}, ${data.gradient.end})`};
-  width: ${({ data }) => `${data.size.width}px`};
-  height: ${({ data }) => `${data.size.height}px`};
+  transform: ${({ resource }) => `scale(${resource.scale})`};
+  background: ${({ resource }) => resource.backgroundType === 'color' ? `${resource.background}` : `linear-gradient(${resource.gradient.start}, ${resource.gradient.end})`};
+  width: ${({ resource }) => `${resource.size.width}px`};
+  height: ${({ resource }) => `${resource.size.height}px`};
   box-shadow: var(--boxShadow);
   transition: var(--transition);
 `

@@ -125,12 +125,14 @@ function Nav() {
             <Menu>
                 <MenuItem 
                     className={selectedMenu === 'size' ? 'selected' : null} 
-                    onMouseEnter={() => handleSelectMenu('size')}
                 >
-                    <ItemIcon>
-                        <Image src={M_Size_Icon} width={24} height={24} />
-                    </ItemIcon>
-                    <ItemLabel>Size</ItemLabel>
+                    <MenuWrap onClick={() => handleSelectMenu('size')}>
+                        <ItemIcon>
+                            <Image src={M_Size_Icon} width={24} height={24} />
+                        </ItemIcon>
+                        <ItemLabel>Size</ItemLabel>
+                    </MenuWrap>
+
                     <SizePanel selectedMenu={selectedMenu}>
                         <h3>썸네일 사이즈 설정</h3>
 
@@ -169,22 +171,24 @@ function Nav() {
                 
                 <MenuItem 
                     className={selectedMenu === 'text' ? 'selected' : null}
-                    onMouseEnter={() => handleSelectMenu('text')}
                 >
-                    <ItemIcon>
-                        <Image src={M_Text_Icon} width={24} height={24} />
-                    </ItemIcon>
-                    <ItemLabel>Text</ItemLabel>
+                    <MenuWrap onClick={() => handleSelectMenu('text')}>
+                        <ItemIcon>
+                            <Image src={M_Text_Icon} width={24} height={24} />
+                        </ItemIcon>
+                        <ItemLabel>Text</ItemLabel>
+                    </MenuWrap>
                 </MenuItem>
 
                 <MenuItem 
                     className={selectedMenu === 'fill' ? 'selected' : null}
-                    onMouseEnter={() => handleSelectMenu('fill')}
                 >
-                    <ItemIcon>
-                        <Image src={M_Fill_Icon} width={24} height={24} />
-                    </ItemIcon>
-                    <ItemLabel>Fill</ItemLabel>
+                    <MenuWrap onClick={() => handleSelectMenu('fill')}>
+                        <ItemIcon>
+                            <Image src={M_Fill_Icon} width={24} height={24} />
+                        </ItemIcon>
+                        <ItemLabel>Fill</ItemLabel>
+                    </MenuWrap>
 
                     <FillPanel selectedMenu={selectedMenu}>
                         <h3>채우기 설정</h3>
@@ -258,15 +262,16 @@ function Nav() {
 
                 <MenuItem 
                     className={selectedMenu === 'icon' ? 'selected' : null}
-                    onMouseEnter={() => handleSelectMenu('icon')}
                 >
-                    <ItemIcon>
-                        <Image src={M_Sticker_Icon} width={24} height={24} />
-                    </ItemIcon>
-                    <ItemLabel>Icon</ItemLabel>
-                    <IconPanel selectedMenu={selectedMenu}>
-                        <h3>아이콘 설정</h3>
-                    </IconPanel>
+                    <MenuWrap onClick={() => handleSelectMenu('icon')}>
+                        <ItemIcon>
+                            <Image src={M_Sticker_Icon} width={24} height={24} />
+                        </ItemIcon>
+                        <ItemLabel>Icon</ItemLabel>
+                        <IconPanel selectedMenu={selectedMenu}>
+                            <h3>아이콘 설정</h3>
+                        </IconPanel>
+                    </MenuWrap>
                 </MenuItem>
             </Menu>
         </NavWrap>
@@ -340,10 +345,6 @@ const Menu = styled.div`
 const MenuItem = styled.div`
     position: relative;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
     width: 100%;
     height: 85px;
     border-bottom: 1px solid var(--borderSubColor);
@@ -408,6 +409,15 @@ const MenuItem = styled.div`
             width: 50%;
         }
     }
+`
+
+const MenuWrap = styled.div`
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
 `
 
 const ItemIcon = styled.div``
