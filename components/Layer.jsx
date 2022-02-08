@@ -25,6 +25,8 @@ function Layer() {
             color: '#000000',
             zIndex: 1,
             weight: 'normal',
+            fontFamily: '',
+            spacing: 0
         }
 
         let newTexts = data.texts || []
@@ -45,6 +47,7 @@ function Layer() {
                 type="text" 
                 name="text" 
                 onChange={(e) => setText(e.target.value)} 
+                autoComplete="off"
                 placeholder='이곳에 텍스트를 입력하세요.' 
                 value={text}
             />
@@ -60,6 +63,7 @@ function Layer() {
                             <input 
                                 type="text" 
                                 defaultValue={v.text}
+                                autoComplete="off"
                                 onChange={(e) => {
                                     const { value } = e.target
 
@@ -74,7 +78,7 @@ function Layer() {
                             />
                             <button onClick={() => {
                                 let newTexts = data.texts
-                                newTexts = newTexts.filter(item => item.id !== v.id)
+                                newTexts = newTexts.filter(item => item.id !== v.id && item.text !== v.text)
 
                                 setData({
                                     ...data,
@@ -82,8 +86,9 @@ function Layer() {
                                 })
                             }}>삭제</button>
                         </div>
+
                         <div className="text-option">
-                            크기
+                            <span className="label">크기</span>
                             <input 
                                 type="number" 
                                 defaultValue={v.size}
@@ -99,6 +104,25 @@ function Layer() {
                                     })
                                 }}
                             />
+
+                            <span className="label">자간</span>
+                            <input 
+                                type="number" 
+                                step={0.1}
+                                defaultValue={v.spacing}
+                                onChange={(e) => {
+                                    const { value } = e.target
+
+                                    let newTexts = data.texts
+                                    newTexts[i].spacing = value
+
+                                    setData({
+                                        ...data,
+                                        texts: newTexts
+                                    })
+                                }}
+                            />
+                        
 
                             <div className={data.texts[i].weight === 'bold' ? 'selected img-box' : 'img-box'}>
                                 <Image 
@@ -122,28 +146,10 @@ function Layer() {
                                 />
                             </div>
 
-                            <div className="img-box">
-                                <Image src={AlignLeft} width={18} height={18} />
-                            </div>
+                        </div>
 
-                            <div className="img-box" onClick={() => {
-                                let newTexts = data.texts
-
-                                newTexts[i].posX = 50
-                                newTexts[i].posY = 50
-
-                                setData({
-                                    ...data,
-                                    texts: newTexts
-                                })
-                            }}>
-                                <Image src={AlignCenter} width={18} height={18} />
-                            </div>
-                            
-                            <div className="img-box">
-                                <Image src={AlignRight} width={18} height={18} />
-                            </div>
-
+                        <div className="text-option">
+                            <span className="label">색상</span>
                             <input 
                                 type="color" 
                                 defaultValue={v.color}
@@ -159,6 +165,33 @@ function Layer() {
                                     })
                                 }}
                             />
+                            
+                            <span className="label">글꼴</span>
+                            <select 
+                                onChange={(e) => {
+                                    const { value } = e.target
+
+                                    let newTexts = data.texts
+                                    newTexts[i].fontFamily = value
+
+                                    setData({
+                                        ...data,
+                                        texts: newTexts
+                                    })
+                            }}>
+                                <option selected value='Pretendard-ExtraLight'>Pretendard (Default)</option>
+                                <option value='Raleway'>Raleway</option>
+                                <option value='paybooc-Bold'>페이북</option>
+                                <option value='GowunBatang-Regular'>고운바탕 Regular</option>
+                                <option value='InkLipquid'>잉크립퀴드체</option>
+                                <option value='GongGothicMedium'>이사만루</option>
+                                <option value='Vitro_core'>비트로 코어체</option>
+                                <option value='Y_Spotlight'>Y 너만을 비춤체</option>
+                                <option value='Cafe24Ssurround'>카페24 써라운드</option>
+                                <option value='SBAggroB'>어그로체B</option>
+                                <option value='GangwonEdu_OTFBoldA'>강원교육모두체 Bold</option>
+                                <option value='SANJUGotgam'>상주곶감체</option>
+                            </select>
                         </div>
                     </div>
                 )}
@@ -176,10 +209,10 @@ const LayerWrap = styled.div`
     right: 0;
     opacity: ${({ data }) => data.textControl ? '1' : '0'};
     visibility: ${({ data }) => data.textControl ? 'visible' : 'hidden'};
-    width: ${({ data }) => data.textControl ? '250px' : '0'};
+    width: ${({ data }) => data.textControl ? '280px' : '0'};
     height: ${({ data }) => data.textControl ? '100%' : '0'};
     transform: ${({ data }) => data.textControl ? 'translateX(0)' : 'translateX(-250px)'};
-    background: #fff;
+    background: rgba(255, 255, 255, 0.959);
     box-shadow: var(--boxShadow);
     transition: var(--transition);
     display: flex;
@@ -213,6 +246,8 @@ const LayerWrap = styled.div`
     .text-item {
         width: 100%;
         margin-bottom: 15px;
+        border: 1px solid #eee;
+        border-top: none;
 
         &:nth-last-child(1) { 
             margin-bottom: 0px;
@@ -226,39 +261,95 @@ const LayerWrap = styled.div`
             text-align: left;
             font-size: 13px;
             font-weight: 600;
+            display: flex;
+            align-items: center;
 
             input {
                 width:80%;
+                height: 35px;
+                border-right: 0px;
             }
 
             button {
+                border: none;
                 width: 20%;
+                height: 35px;
+                color: #fff;
+                background: #e04747;
+                transition: all 0.2s ease-out;
+
+                &:hover {
+                    background: #c43232;
+                }
             }
         }
 
         .text-option {
+            margin-top: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 13px;
+            font-size: 12px;
+            font-weight: 600;
+
+            .label {
+                padding: 4px 6px;
+                background: var(--borderSubColor);
+                border-radius: 5px;
+            }
 
             .selected {
                 background: var(--borderSubColor);
             }
 
+
             input[type=number] {
+                margin-left: 5px;
+                padding-left: 3px;
                 width: 50px;
-                border: none;
+                height: 35px;
             }
             input[type=color] {
                 padding: 0px;
-                width: 40px;
-                height: 25px;
+                width: 35px;
+                height: 35px;
+                margin-left: 4px;
+                margin-right: 6px;
+            }
+
+            input[type=number] {
+                border: none;
+                border-bottom: 2px solid #fff;
+
+                &:focus {
+                    border-bottom: 2px solid var(--primary);
+                }
+            }
+
+            select {
+                width: 100px;
+                font-size: 12px;
+                border: none;
+                border-bottom: 2px solid #fff;
+
+                &:focus {
+                    border-bottom: 2px solid var(--primary);
+                }
             }
 
             .img-box {
-                padding: 4px;
+                margin-left: 5px;
+                width: 35px;
+                height: 35px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
                 border: 1px solid var(--borderSubColor);
+                transition: all 0.2s ease-out;
+
+                &:hover {
+                    background: var(--borderSubColor);
+                }
             }
         }
     }

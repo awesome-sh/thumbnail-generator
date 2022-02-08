@@ -1,16 +1,19 @@
 import Head from 'next/head'
 import Image from 'next/image'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useState, useRef } from 'react'
 import styled from 'styled-components'
 import Nav from '../components/Nav'
 import { useSelector } from 'react-redux'
 import { AppContext } from '../contexts/context'
 import Layer from '../components/Layer'
+import html2canvas from 'html2canvas'
 
 import RotationIcon from '../public/assets/icons/rotation.png'
 
 export default function Home() {
   const {data, setData} = useContext(AppContext)
+
+  const printRef = useRef()
 
   const [resource, setResource] = useState(data)
 
@@ -70,12 +73,6 @@ export default function Home() {
     e.preventDefault()
   }
 
-  const handleDragOver = (e) => {
-    console.log('>> 드래그 중')
-    e.preventDefault()
-    return false;
-  }
-
   let onMouseMove;
 
   const handleMouseDown = (e) => {
@@ -105,11 +102,24 @@ export default function Home() {
     };
   }
 
+  const handleDownloadImage = async () => {
+    const $element = printRef.current
+    const $canvas = await html2canvas($element)
 
-  const handleClick = (e) => {
-    const { target } = e
-    console.log( target.offsetWidth )
-    console.log( target.offsetHeight)
+    const data = $canvas.toDataURL('imgage/png')
+    const link = document.createElement('a')
+
+    if(typeof link.download === 'string') {
+      link.href = data;
+      link.download = 'thumbnail.png'
+
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    } else {
+      window.open(data)
+    }
+
   }
 
   return (
@@ -122,21 +132,15 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <Nav />
+      <Nav handleDownloadImage={handleDownloadImage} />
 
-      <Main>
+      <Main ref={printRef}>
         <Canvas 
           resource={resource}
         ></Canvas>
           { resource.texts.length > 0 && resource.texts.map((v, i) => 
               <div 
                 key={i}
-                /*
-                draggable="true"
-                onDragStart={() => console.log('>> 드래그 시작')}
-                onDragOver={handleDragOver}
-                onDragEnd={handleDrag}
-                */
                 onDragStart={(e) => e.preventDefault()}
                 onMouseDown={handleMouseDown}
                 className={`element text-${v}`}
@@ -145,22 +149,20 @@ export default function Home() {
                   cursor: 'default',
                   fontSize: `${v.size}px`,
                   fontWeight: `${v.weight}`,
+                  fontFamily: `${v.fontFamily}`,
+                  letterSpacing: `${v.spacing}px`,
                   color: v.color,
                   zIndex: v.zIndex,
                   left: v.posX === 0 ? '' : `50%`,
                 }}
-                onClick={handleClick}
               >
                 {v.text}
               </div>
 
             )
           }
-        
       </Main>
-
       <Layer />
-
     </Wrap>
   )
 }
@@ -173,9 +175,11 @@ export function getServerSideProps() {
     },
     backgroundType: 'color',
     background: '#ffffff',
+    backgroundImg: '',
     gradient: {
       start: '#000000',
-      end: '#ffffff'
+      end: '#ffffff',
+      deg: 90
     },
     scale: 1,
     textControl: false,
@@ -236,8 +240,8 @@ const Main = styled.main`
     }
 
     &:hover {
-      background: rgba(255, 255, 255, 0.384);
-      border: 2px dotted #202020;
+      background: rgba(255, 255, 255, 0.281);
+      border: 3px dotted rgba(32, 32, 32, 0.582);
     }
 
     &:hover .rotate-icon {
@@ -252,7 +256,7 @@ const Canvas = styled.div`
   position: relative;
   z-index: 0;
   transform: ${({ resource }) => `scale(${resource.scale})`};
-  background: ${({ resource }) => resource.backgroundType === 'color' ? `${resource.background}` : `linear-gradient(${resource.gradient.start}, ${resource.gradient.end})`};
+  background: ${({ resource }) => resource.backgroundType === 'color' ? `${resource.background}` : resource.backgroundType === 'gradient' ? `linear-gradient(${resource.gradient.deg}deg, ${resource.gradient.start}, ${resource.gradient.end})` : `url(${resource.backgroundImg}) fixed center`};
   width: ${({ resource }) => `${resource.size.width}px`};
   height: ${({ resource }) => `${resource.size.height}px`};
   box-shadow: var(--boxShadow);

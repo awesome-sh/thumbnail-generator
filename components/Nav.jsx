@@ -9,8 +9,10 @@ import M_Size_Icon from '../public/assets/icons/m-size.png'
 import M_Text_Icon from '../public/assets/icons/m-text.png'
 import M_Fill_Icon from '../public/assets/icons/m-fill.png'
 import M_Sticker_Icon from '../public/assets/icons/m-sticker.png'
+import M_Share_Icon from '../public/assets/icons/m-share.png'
+import { createElement } from 'react'
 
-function Nav() {
+function Nav({ handleDownloadImage }) {
     const { data, setData } = useContext(AppContext)
     const [selectedMenu, setSelectedMenu] = useState('')
     const { size } = data
@@ -71,7 +73,8 @@ function Nav() {
     const [fillColor, setFillColor] = useState('')
     const [fillGradient, setFillGradient] = useState({
         start: '#000000',
-        end: '#ffffff'
+        end: '#ffffff',
+        deg: 90
     })
 
     const handleApplyFill = () => {
@@ -105,6 +108,40 @@ function Nav() {
             ...fillGradient,
             [name]: value
         })
+    }
+
+    const handleImageUpload = () => {
+        const fileElement = document.createElement('input')
+        fileElement.setAttribute('type', 'file')
+        fileElement.click()
+
+        const fileChangeEvent = (e) => {
+            const selectFile = e.target.files[0]
+            console.log(e.target.files[0])
+            reader.onloadend = () => {
+                setData({
+                    ...data,
+                    backgroundType: 'img',
+                    backgroundImg: reader.result
+                })
+            }
+
+            reader.readAsDataURL(selectFile)
+            fileElement.removeEventListener('change', fileChangeEvent)
+        }
+
+        let reader = new FileReader()
+        fileElement.addEventListener('change', fileChangeEvent)
+    }
+
+    const handleImageDelete = () => {
+        if(window.confirm('배경이미지를 삭제하시겠습니까?')) {
+            setData({
+                ...data,
+                backgroundType: 'color',
+                backgroundImg: ''
+            })
+        }
     }
 
     return (
@@ -208,11 +245,17 @@ function Nav() {
                                     hanelBackgroundType('gradient')
                                 }}
                             >그라디언트</div>
+                            <div 
+                                className={fillTab === 'img' ? 'img selected' : 'img'}
+                                onClick={() => {
+                                    setFillTab('img')
+                                    hanelBackgroundType('img')
+                                }}
+                            >이미지</div>
                         </div>
 
                         <div className="options">
-                            {
-                                fillTab === 'color' ?
+                            { fillTab === 'color' &&
                                 <div className='color-items single'>
                                     <div className="color-item">
                                         <div className="color-label">색상</div>
@@ -225,31 +268,71 @@ function Nav() {
                                         </div>
                                     </div>
                                 </div>
-                                :
-                                <div className='color-items'>
-                                    <div className="color-item">
-                                        <div className="color-label">시작</div>
-                                        <div className="color-input">
-                                            <input 
-                                                type="color" 
-                                                name="start"
-                                                onChange={handleSetGradient}
-                                                defaultValue={data.gradient.start}
-                                            />
+                            }
+
+                            { fillTab === 'gradient' &&
+                                <>
+                                    <div className='color-items single'>
+                                        <div className="color-item">
+                                            <div className="color-label">시작</div>
+                                            <div className="color-input">
+                                                <input 
+                                                    type="color" 
+                                                    name="start"
+                                                    onChange={handleSetGradient}
+                                                    defaultValue={data.gradient.start}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="color-item">
+                                            <div className="color-label">종료</div>
+                                            <div className="color-input">
+                                                <input 
+                                                    type="color" 
+                                                    name="end"
+                                                    onChange={handleSetGradient}
+                                                    defaultValue={data.gradient.end}
+                                                />
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className="color-item">
-                                        <div className="color-label">종료</div>
-                                        <div className="color-input">
-                                            <input 
-                                                type="color" 
-                                                name="end"
-                                                onChange={handleSetGradient}
-                                                defaultValue={data.gradient.end}
-                                            />
+
+                                    <br/>
+
+                                    <div className='color-items single'>
+                                        <div className="color-item">
+                                            <div className="color-label">각</div>
+                                            <div className="color-input">
+                                                <input 
+                                                    type="text"
+                                                    name="deg"
+                                                    defaultValue={data.gradient.deg}
+                                                    onChange={handleSetGradient}
+                                                />º
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                </>
+                            }
+
+                            { fillTab === 'img' &&
+                                <>
+                                    <div className="img-item">
+                                        <div className="img-label">이미지</div>
+                                        <div className="img-input" onClick={handleImageUpload}>
+                                            파일 업로드
+                                        </div>
+                                    </div>
+
+                                    {data.backgroundType === 'img' && 
+                                        <>
+                                            <p className='exist'>
+                                                이미 업로드된 이미지가 존재합니다.
+                                                <b onClick={handleImageDelete}>삭제</b>
+                                            </p>
+                                        </>
+                                    }
+                                </>
                             }
                         </div>
 
@@ -261,16 +344,20 @@ function Nav() {
                 </MenuItem>
 
                 <MenuItem 
-                    className={selectedMenu === 'icon' ? 'selected' : null}
+                    className={selectedMenu === 'share' ? 'selected' : null}
                 >
-                    <MenuWrap onClick={() => handleSelectMenu('icon')}>
+                    <MenuWrap onClick={() => handleSelectMenu('share')}>
                         <ItemIcon>
-                            <Image src={M_Sticker_Icon} width={24} height={24} />
+                            <Image src={M_Share_Icon} width={24} height={24} />
                         </ItemIcon>
-                        <ItemLabel>Icon</ItemLabel>
-                        <IconPanel selectedMenu={selectedMenu}>
-                            <h3>아이콘 설정</h3>
-                        </IconPanel>
+                        <ItemLabel>Share</ItemLabel>
+                        <SharePanel selectedMenu={selectedMenu}>
+                            <h3>공유</h3>
+
+                            <ul>
+                                <li onClick={handleDownloadImage}>다운로드 (.png)</li>
+                            </ul>
+                        </SharePanel>
                     </MenuWrap>
                 </MenuItem>
             </Menu>
@@ -468,7 +555,7 @@ const FillPanel = styled.div`
     left: ${({ selectedMenu }) => selectedMenu !== 'fill' ? '140px' : '90px'};
     opacity:  ${({ selectedMenu }) => selectedMenu !== 'fill' ? '0' : '1'};
     visibility: ${({ selectedMenu }) => selectedMenu !== 'fill' ? 'hidden' : 'visible'};
-    width: 250px;
+    width: 350px;
     background: #fff;
     border-bottom: 1px solid var(--borderColor);
     box-shadow: var(--boxShadow);
@@ -496,6 +583,35 @@ const FillPanel = styled.div`
         margin-top: 20px;
         width: 100%;
         display: flex;
+        flex-direction: column;
+
+        .exist {
+            width: 100%;
+            font-size: 12px;
+            height: 50px;
+            line-height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            b { 
+                cursor: pointer;
+                margin-left: 15px;
+                width: 50px;
+                height: 30px;
+                background: #e04747;
+                font-weight: bold;
+                color: #fff;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                transition: all 0.2s ease-out;
+
+                &:hover {
+                    background: #c43232;
+                }
+            }
+        }
 
         .color-items {
             width: 100%;
@@ -525,6 +641,36 @@ const FillPanel = styled.div`
                     width: 28px;
                     height: 28px;
                 }
+
+                input[type=text] {
+                    width: 40px;
+                }
+            }
+        }
+
+        .img-item {
+            width: 100%;
+            display: flex;
+            align-items: center;
+
+            .img-label {
+                width: 30%;
+                font-size: 12px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .img-input {
+                width: 70%;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 13px;
+                border: 1px solid #eee;
+                background: #eee;
             }
         }
     }
@@ -544,6 +690,34 @@ const IconPanel = styled.div`
     border-bottom: 1px solid var(--borderColor);
     box-shadow: var(--boxShadow);
     transition: var(--transition);
+`
+
+const SharePanel = styled.div`
+    cursor: default;
+    position: absolute;
+    padding: 20px;
+    bottom: 0;
+    left: ${({ selectedMenu }) => selectedMenu !== 'share' ? '140px' : '90px'};
+    opacity:  ${({ selectedMenu }) => selectedMenu !== 'share' ? '0' : '1'};
+    visibility: ${({ selectedMenu }) => selectedMenu !== 'share' ? 'hidden' : 'visible'};
+    width: 250px;
+    background: #fff;
+    border-bottom: 1px solid var(--borderColor);
+    box-shadow: var(--boxShadow);
+    transition: var(--transition);
+
+    ul {
+        list-style: none;
+    }
+
+    ul li {
+        cursor: pointer;
+        padding-left: 15px;
+        font-size: 12px;
+        font-weight: bold;
+        height: 35px;
+        line-height: 35px;
+    }
 `
 
 
