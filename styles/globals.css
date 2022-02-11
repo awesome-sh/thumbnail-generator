@@ -140,6 +140,10 @@ input {
   -o-transition: var(--transition);
 }
 
+select {
+  border: 1px solid var(--borderColor);
+}
+
 button {
   cursor: pointer;
   border: none;

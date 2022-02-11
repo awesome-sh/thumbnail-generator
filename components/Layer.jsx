@@ -178,8 +178,10 @@ function Layer() {
                                         ...data,
                                         texts: newTexts
                                     })
-                            }}>
-                                <option selected value='Pretendard-ExtraLight'>Pretendard (Default)</option>
+                                }}
+                                defaultValue={'Pretendard-ExtraLight'}
+                            >
+                                <option value='Pretendard-ExtraLight'>Pretendard (Default)</option>
                                 <option value='Raleway'>Raleway</option>
                                 <option value='paybooc-Bold'>페이북</option>
                                 <option value='GowunBatang-Regular'>고운바탕 Regular</option>
@@ -192,6 +194,25 @@ function Layer() {
                                 <option value='GangwonEdu_OTFBoldA'>강원교육모두체 Bold</option>
                                 <option value='SANJUGotgam'>상주곶감체</option>
                             </select>
+                        </div>
+
+                        <div className="text-option">
+                            <span className="label">Z 속성</span>
+                            <input 
+                                type="number" 
+                                defaultValue={v.zIndex}
+                                onChange={(e) => {
+                                    const { value } = e.target
+
+                                    let newTexts = data.texts
+                                    newTexts[i].zIndex = value
+
+                                    setData({
+                                        ...data,
+                                        texts: newTexts
+                                    })
+                                }}
+                            />
                         </div>
                     </div>
                 )}

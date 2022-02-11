@@ -18,7 +18,6 @@ export default function Home() {
   const [resource, setResource] = useState(data)
 
   useEffect(() => {
-    console.log(data)
     setResource(data)
   }, [data])
 
@@ -29,7 +28,6 @@ export default function Home() {
 
   useEffect(() => {
     const getClientSize = () => {
-      console.log('>> Client Size Changed!')
       setClientSize({
         width: window.innerWidth,
         height: window.innerHeight
@@ -41,15 +39,11 @@ export default function Home() {
     return () => window.removeEventListener('resize', getClientSize)
   }, [])
 
-  console.log('>> Index Data :: ', data)
-
   const handleDrag = (e) => {
-    
-    console.log('>> 드래그 끝')
-
     const offsetX = e.target.offsetWidth
     const offsetY = e.target.offsetHeight
 
+    /*
     console.group('>> Element Offset Check')
     console.log('- Offset X :: ', offsetX)
     console.log('- Offset Y :: ', offsetY)
@@ -60,13 +54,16 @@ export default function Home() {
     console.log('- Client Y :: ', e.clientY)
     console.groupEnd()
 
-    const x = ((e.clientX - offsetX) / window?.innerWidth) * 100
-    const y = ((e.clientY - offsetY) / window?.innerHeight) * 100
+
 
     console.group('>> Top, Left Percentage X, Y')
     console.log('- X :: ', x)
     console.log('- Y :: ', y)
     console.groupEnd()
+    */
+
+    const x = ((e.clientX - offsetX) / window?.innerWidth) * 100
+    const y = ((e.clientY - offsetY) / window?.innerHeight) * 100
 
     e.target.style.left = `${x}%`
     e.target.style.top = `${y}%`
@@ -119,7 +116,14 @@ export default function Home() {
     } else {
       window.open(data)
     }
+  }
 
+  const handleClickTextPanel = () => {
+    setData({
+      ...data,
+      menu: 'text',
+      textControl: true
+  })
   }
 
   return (
@@ -129,7 +133,6 @@ export default function Home() {
       <Head>
         <title>Awesome Thumbnail Generator - Blog Post, Etc.</title>
         <meta name="description" content="Awesome Thumbnail Generator" />
-        <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <Nav handleDownloadImage={handleDownloadImage} />
@@ -155,6 +158,7 @@ export default function Home() {
                   zIndex: v.zIndex,
                   left: v.posX === 0 ? '' : `50%`,
                 }}
+                onClick={handleClickTextPanel}
               >
                 {v.text}
               </div>
@@ -169,6 +173,7 @@ export default function Home() {
 
 export function getServerSideProps() {
   const data = {
+    menu: '',
     size: {
       width: 720,
       height: 480
@@ -256,7 +261,7 @@ const Canvas = styled.div`
   position: relative;
   z-index: 0;
   transform: ${({ resource }) => `scale(${resource.scale})`};
-  background: ${({ resource }) => resource.backgroundType === 'color' ? `${resource.background}` : resource.backgroundType === 'gradient' ? `linear-gradient(${resource.gradient.deg}deg, ${resource.gradient.start}, ${resource.gradient.end})` : `url(${resource.backgroundImg}) fixed center`};
+  background: ${({ resource }) => resource.backgroundType === 'color' ? `${resource.background}` : resource.backgroundType === 'gradient' ? `linear-gradient(${resource.gradient.deg}deg, ${resource.gradient.start}, ${resource.gradient.end})` : `url(${resource.backgroundImg}) ${resource.repeat ? 'repeat' : 'no-repeat'} fixed center`};
   width: ${({ resource }) => `${resource.size.width}px`};
   height: ${({ resource }) => `${resource.size.height}px`};
   box-shadow: var(--boxShadow);

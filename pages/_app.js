@@ -5,7 +5,7 @@ import defaultStore from '../store'
 import { AppProvider } from '../contexts/context'
 
 const store = () => createStore(defaultStore)
-const wrapper = createWrapper(store, { debug: true })
+const wrapper = createWrapper(store, { debug: false })
 
 function MyApp({ Component, pageProps }) {
   return (

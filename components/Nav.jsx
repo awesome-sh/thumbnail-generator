@@ -17,31 +17,20 @@ function Nav({ handleDownloadImage }) {
     const [selectedMenu, setSelectedMenu] = useState('')
     const { size } = data
 
-    const handleDrag = (e) => {
-        e.target.style.top = `${e.clientY}px`;
-        e.target.style.left = `${e.clientX}px`;
-        e.target.style.transform = ''
-        e.preventDefault()
-    }
-
-    const handleDragOver = (e) => {
-        e.preventDefault()
-     }
-
     const handleSelectMenu = ( menu ) => {
-        console.log('>> Change Menu', menu)
         if(menu === 'text') {
             setData({
                 ...data,
+                menu,
                 textControl: true
             })
         } else {
             setData({
                 ...data,
+                menu,
                 textControl: false
             })
         }
-        setSelectedMenu(state => menu)
     }
 
     const [sizeInputs, setSizeInputs] = useState({ width: size.width, height: size.height })
@@ -54,8 +43,30 @@ function Nav({ handleDownloadImage }) {
         })
     }
 
+    const handleChangePresetSize = (e) => {
+        const width = e.target.value
+
+        let height;
+
+        if(width === '320') {
+            height = 240
+        } else if(width === '640') {
+            height = 480
+        } else if(width === '1280') {
+            height = 720
+        } else if(width === '1920') {
+            height = 1080
+        } else {
+            return
+        }
+
+        setSizeInputs({
+            width,
+            height
+        })
+    }
+
     const handleApplySize = () => {
-        console.log('>> Apply Change Size!', sizeInputs)
         setData({
             ...data,
             size: {...sizeInputs}
@@ -64,6 +75,8 @@ function Nav({ handleDownloadImage }) {
     }
     
     const [backgroundType, setBackgroundType] = useState('color')
+    const [backgroundImage, setBackgroundImage] = useState()
+    const [repeat, setRepeat] = useState(false)
 
     const hanelBackgroundType = (type) => {
         setBackgroundType(type)
@@ -86,16 +99,18 @@ function Nav({ handleDownloadImage }) {
                 backgroundType,
                 background: fillColor
             })
-        } else {
+        } else if(backgroundType === 'gradient') {
             setData({
                 ...data,
                 backgroundType,
                 gradient: fillGradient
             })
-            console.log({
+        } else {
+            setData({
                 ...data,
                 backgroundType,
-                gradient: fillGradient
+                backgroundImg: backgroundImage,
+                repeat,
             })
         }
         setSelectedMenu('')
@@ -117,13 +132,8 @@ function Nav({ handleDownloadImage }) {
 
         const fileChangeEvent = (e) => {
             const selectFile = e.target.files[0]
-            console.log(e.target.files[0])
             reader.onloadend = () => {
-                setData({
-                    ...data,
-                    backgroundType: 'img',
-                    backgroundImg: reader.result
-                })
+                setBackgroundImage(reader.result)
             }
 
             reader.readAsDataURL(selectFile)
@@ -161,7 +171,7 @@ function Nav({ handleDownloadImage }) {
 
             <Menu>
                 <MenuItem 
-                    className={selectedMenu === 'size' ? 'selected' : null} 
+                    className={data.menu === 'size' ? 'selected' : null} 
                 >
                     <MenuWrap onClick={() => handleSelectMenu('size')}>
                         <ItemIcon>
@@ -170,11 +180,26 @@ function Nav({ handleDownloadImage }) {
                         <ItemLabel>Size</ItemLabel>
                     </MenuWrap>
 
-                    <SizePanel selectedMenu={selectedMenu}>
+                    <SizePanel selectedMenu={data.menu}>
                         <h3>썸네일 사이즈 설정</h3>
 
                         <div className="frm">
                             <div className="frm-desc">단위, 픽셀(Pixel)</div>
+
+                            <div className="frm-presets">
+                                <div className="label">프리셋<br/><p>Presets</p></div>
+                                <div className="select">
+                                    <select defaultValue={""} onChange={handleChangePresetSize}>
+                                        <option value="" disabled>선택</option>
+                                        <option value={320}>SD (320x240)</option>
+                                        <option value={640}>VGA (640x480)</option>
+                                        <option value={1280}>HD (1280x720)</option>
+                                        <option value={1920}>FULL HD (1920x1080)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            
 
                             <div className="frm-item">
                                 <div className="frm-label">가로<br/><p>Width</p></div>
@@ -183,7 +208,7 @@ function Nav({ handleDownloadImage }) {
                                         type="number" 
                                         name="width" 
                                         onChange={handleChangeSize} 
-                                        defaultValue={size.width}
+                                        defaultValue={sizeInputs.width}
                                     />px</div>
                             </div>
 
@@ -194,7 +219,7 @@ function Nav({ handleDownloadImage }) {
                                         type="number" 
                                         name="height" 
                                         onChange={handleChangeSize} 
-                                        defaultValue={size.height}
+                                        defaultValue={sizeInputs.height}
                                     />px</div>
                             </div>
                         </div>
@@ -207,7 +232,7 @@ function Nav({ handleDownloadImage }) {
                 </MenuItem>
                 
                 <MenuItem 
-                    className={selectedMenu === 'text' ? 'selected' : null}
+                    className={data.menu === 'text' ? 'selected' : null}
                 >
                     <MenuWrap onClick={() => handleSelectMenu('text')}>
                         <ItemIcon>
@@ -218,7 +243,7 @@ function Nav({ handleDownloadImage }) {
                 </MenuItem>
 
                 <MenuItem 
-                    className={selectedMenu === 'fill' ? 'selected' : null}
+                    className={data.menu === 'fill' ? 'selected' : null}
                 >
                     <MenuWrap onClick={() => handleSelectMenu('fill')}>
                         <ItemIcon>
@@ -227,7 +252,7 @@ function Nav({ handleDownloadImage }) {
                         <ItemLabel>Fill</ItemLabel>
                     </MenuWrap>
 
-                    <FillPanel selectedMenu={selectedMenu}>
+                    <FillPanel selectedMenu={data.menu}>
                         <h3>채우기 설정</h3>
 
                         <div className="type">
@@ -320,12 +345,20 @@ function Nav({ handleDownloadImage }) {
                                     <div className="img-item">
                                         <div className="img-label">이미지</div>
                                         <div className="img-input" onClick={handleImageUpload}>
-                                            파일 업로드
+                                            { backgroundImage ? '선택 완료' : '찾아보기' }
                                         </div>
+                                    </div>
+                                    <div className="img-item">
+                                        <div className="img-label">반복설정</div>
+                                        <ul className="img-ul">
+                                            <li className={repeat ? 'selected' : null} onClick={() => setRepeat(true)}>반복</li>
+                                            <li className={!repeat ? 'selected' : null} onClick={() => setRepeat(false)}>반복하지않음</li>
+                                        </ul>
                                     </div>
 
                                     {data.backgroundType === 'img' && 
                                         <>
+                                            
                                             <p className='exist'>
                                                 이미 업로드된 이미지가 존재합니다.
                                                 <b onClick={handleImageDelete}>삭제</b>
@@ -344,14 +377,14 @@ function Nav({ handleDownloadImage }) {
                 </MenuItem>
 
                 <MenuItem 
-                    className={selectedMenu === 'share' ? 'selected' : null}
+                    className={data.menu === 'share' ? 'selected' : null}
                 >
                     <MenuWrap onClick={() => handleSelectMenu('share')}>
                         <ItemIcon>
                             <Image src={M_Share_Icon} width={24} height={24} />
                         </ItemIcon>
                         <ItemLabel>Share</ItemLabel>
-                        <SharePanel selectedMenu={selectedMenu}>
+                        <SharePanel selectedMenu={data.menu}>
                             <h3>공유</h3>
 
                             <ul>
@@ -456,6 +489,39 @@ const MenuItem = styled.div`
         font-size: 11px;
     }
 
+    .frm-presets {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #eee;
+
+        .label {
+            width: 30%;
+            text-align: center;
+            font-size: 13px;
+            font-weight: bold;
+
+            p {
+                font-family: var(--engFont);
+                font-size: 10px;
+                color: var(--fontSubColor);
+            }
+        }
+
+        .select {
+            width: 70%;
+
+            select {
+                width: 100%;
+                border-radius: 4px;
+                padding-left: 6px;
+                font-size: 12px;
+            }
+        }
+    }
+
     .frm-item {
         display: flex;
         align-items: center;
@@ -483,6 +549,7 @@ const MenuItem = styled.div`
             input {
                 width: 90%;
                 margin-right: 8px;
+                border-radius: 4px;
             }
         }
     }
@@ -652,6 +719,7 @@ const FillPanel = styled.div`
             width: 100%;
             display: flex;
             align-items: center;
+            margin-bottom: 10px;
 
             .img-label {
                 width: 30%;
@@ -671,6 +739,31 @@ const FillPanel = styled.div`
                 font-size: 13px;
                 border: 1px solid #eee;
                 background: #eee;
+            }
+
+            .img-ul {
+                list-style: none;
+                display: flex;
+                width: 70%;
+
+                li {
+                    cursor: pointer;
+                    width: 50%;
+                    height: 40px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 12px;
+                    transition: all 0.2s ease-out;
+
+                    &:hover {
+                        background: #ebf0ff;
+                    }
+                }
+
+                .selected {
+                    background: #f2f5fd;
+                }
             }
         }
     }
