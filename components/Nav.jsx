@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import styled from 'styled-components'
 
@@ -130,6 +130,8 @@ function Nav({ handleDownloadImage }) {
         fileElement.setAttribute('type', 'file')
         fileElement.click()
 
+        let reader = new FileReader()
+
         const fileChangeEvent = (e) => {
             const selectFile = e.target.files[0]
             reader.onloadend = () => {
@@ -140,7 +142,6 @@ function Nav({ handleDownloadImage }) {
             fileElement.removeEventListener('change', fileChangeEvent)
         }
 
-        let reader = new FileReader()
         fileElement.addEventListener('change', fileChangeEvent)
     }
 
@@ -155,14 +156,7 @@ function Nav({ handleDownloadImage }) {
     }
 
     return (
-        <NavWrap 
-            /*
-            draggable="true" 
-            onDrag={handleDrag}
-            onDrop={handleDrag}
-            onDragOver={handleDragOver}
-            */
-        >
+        <NavWrap>
             <Logo>
                 <span className='point'>Awesome</span>
                 <h3>Thumbnail</h3>
@@ -199,8 +193,6 @@ function Nav({ handleDownloadImage }) {
                                 </div>
                             </div>
                             
-                            
-
                             <div className="frm-item">
                                 <div className="frm-label">가로<br/><p>Width</p></div>
                                 <div className="frm-input">

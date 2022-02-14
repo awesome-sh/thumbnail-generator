@@ -3,11 +3,7 @@ import styled from 'styled-components'
 import { AppContext } from '../contexts/context'
 
 // Text Editer Icon
-import AlignLeft from '../public/assets/icons/align-left.png'
-import AlignRight from '../public/assets/icons/align-right.png'
-import AlignCenter from '../public/assets/icons/align-center.png'
 import Bold from '../public/assets/icons/bold.png'
-import Paragraph from '../public/assets/icons/paragraph.png'
 import Image from 'next/image'
 
 function Layer() {
